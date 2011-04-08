@@ -5,26 +5,149 @@
 <style type="text/css">
   html { height: 100% }
   body { height: 100%; margin: 0px; padding: 0px }
-  #map_canvas { height: 100% }
+  #map_canvas { height: 400px; width: 800px; }
+ 
 </style>
-<script type="text/javascript"
-    src="http://maps.google.com/maps/api/js?sensor=true">
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
 </script>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="jquery.rotate.1-1.js"></script>
 <script type="text/javascript">
-  function initialize() {
-    var latlng = new google.maps.LatLng(60.739444 ,-149.0933334);
-    var myboat = new google.maps.MarkerImage("/boot.png",null,null, new google.maps.Point(0,32));
-    var myOptions = {
-      zoom: 16,
-      center: latlng,
-      mapTypeId: google.maps.MapTypeId.TERRAIN
-    };
+  
+//$(document).ready(function() {
+//alert('ready');	
+//});
+var map;
+var image;
+var boatMarker;
+var BoatOrient;
+function initialize() {
+	toggleHistory();
+	toggleDiv('subDiv','toggleSubButton');
+    	BoatOrient=0;
+    	var latlng = new google.maps.LatLng(60.739444 ,-149.0933334);
+   	var myOptions = {
+		zoom: 16,
+		minZoom: 14,
+		maxZoom:18,      
+		center: latlng,
+		mapTypeId: google.maps.MapTypeId.TERRAIN
+	};
+    image = 'typhoon0.png';
     var map = new google.maps.Map(document.getElementById("map_canvas"),
         myOptions);
-  }
+    //mm = new GMarkerManager(map); 
+    var myLatLng = map.getCenter();
+    boatMarker = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        icon: image
+    });
+//  google.maps.event.addListener(map, 'click', function(event) {placeMarker(event.latLng);});
+	
+//  }
+/*
+function placeMarker(location) {
+var marker = new google.maps.Marker({
+      position: location, 
+      map: map
+  });*/
+  map.setCenter(location);
+	map.refresh();
+}
+
+function runit()
+{
+	var post_code=document.getElementById("post_code").value;
+	var pre_code=document.getElementById("pre_code").value;
+	document.getElementById("post_code").value=post_code+"\n/*Execution Time: "+ new Date()+ "*/\n"+pre_code;
+	
+	eval(pre_code);
+	$('#post_code').attr('scrollTop',$('#post_code').attr('scrollHeight'));
+}
+function rotBoat(){
+	if(BoatOrient==-1){BoatOrient=7}
+	if(BoatOrient==9){BoatOrient=1}	
+	BoatOrient=BoatOrient%8;
+	var boatpath='typhoon'+BoatOrient.toString()+'.png';
+	$('.boat').attr('src',boatpath);
+        
+}
+/**/
+function handleKeyDown(keyCode){
+	if(keyCode==65){
+		//rotate ccw
+		BoatOrient++;
+		rotBoat();
+	}
+	if(keyCode==68){
+		//rotate cw
+		BoatOrient--;
+		rotBoat();
+	}
+}
+/*
+function handleKeyUp(keyCode){
+	if(keyCode==65){
+		//rotate ccw
+		BoatOrient++;
+		rotBoat();
+	}
+	if(keyCode==68){
+		//rotate cw
+		BoatOrient--;
+		rotBoat();
+	}*/
+//}
+
+function toggleDiv(divId,toggleBtn){
+		
+	var btvalue= $('#'+toggleBtn).attr('value');
+	if(btvalue=="-"){
+		$('#'+divId).hide();
+		$('#'+toggleBtn).val("+");
+	}
+	if(btvalue=="+"){
+		$('#'+divId).show();
+		$('#'+toggleBtn).val("-");
+	}
+}
+
+
+function toggleHistory(){
+		
+	var btvalue= $('#toggleHistoryButton').attr('value');
+	if(btvalue=="-"){
+		$('#historyDiv').hide();
+		$('#toggleHistoryButton').val("+");
+	}
+	if(btvalue=="+"){
+		$('#historyDiv').show();
+		$('#toggleHistoryButton').val("-");
+	}
+}
 </script>
 </head>
-<body onload="initialize()">
-  <div id="map_canvas" style="width:100%; height:100%"></div>
+<body onload="initialize()"   >
+  <div id="map_canvas" style="heigth:50%; width:100%"></div>
+<input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
+<div id="historyDiv" class="historyDiv" style="width:100%;">
+<textarea rows="5"  id="post_code" style="width:100%;"  onchange=="resizeDiv('historyDiv')">
+</textarea>  
+</div>
+
+<div id="inputDiv" class="inputDiv" >
+<textarea rows="5"  id="pre_code" style="width:100%;"  onchange=="resizeDiv('inputDiv')">
+function exampleFunction(inputstring){
+alert(inputstring);}
+exampleFunction('w00t');
+</textarea>
+   <input name="submit" type="submit" value="Run()" onclick="runit()" style="align:right;">
+</div>
+
+<div id="subDiv" class="subDiv" >
+<img src="typhoon0.png" class="boat" >
+</div>
+<input type="button" id="toggleSubButton" value="-" onclick="toggleDiv('subDiv','toggleSubButton')" >Sub	<p>
 </body>
 </html>
