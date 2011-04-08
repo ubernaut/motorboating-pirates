@@ -40,24 +40,18 @@ function setMarkers(map, beach) {
   
 }
 $(document).ready(function() {
-    // put all your jQuery goodness in here.
+   alert('hi');
    BoatOrient=0;
 });
 function rotBoat(){	
 	BoatOrient=BoatOrient%8;
 	var boatpath='typhoon'+BoatOrient.toString()+'.png';
-/*	alert(boatpath);
-	var image = new google.maps.MarkerImage(boatpath,
+	$('.boat').attr('src',boatpath);
+	/*var image = new google.maps.MarkerImage('boatpath',
 		new google.maps.Size(250, 250),
 		new google.maps.Point(0, 0),
-		new google.maps.Point(125, 125));
-	 var marker = new google.maps.Marker({
-      position: myLatLng,
-      map: map,
-      icon: image,
-      title: beach[0]
-  });*/
-	$('.boat').attr('src',boatpath);
+		new google.maps.Point(125, 125));*/
+	//marker.setImage(image); 
 }
 function handleKeyDown(keyCode){
 	//alert(keyCode);
