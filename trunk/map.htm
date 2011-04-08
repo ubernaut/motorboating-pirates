@@ -22,6 +22,7 @@ var image;
 var boatMarker;
 var BoatOrient;
 function initialize() {
+	//runit();
 	toggleHistory();
 	toggleDiv('subDiv','toggleSubButton');
     	BoatOrient=0;
@@ -54,6 +55,7 @@ var marker = new google.maps.Marker({
   });*/
   map.setCenter(location);
 	map.refresh();
+
 }
 
 function runit()
@@ -129,15 +131,15 @@ function toggleHistory(){
 </script>
 </head>
 <body onload="initialize()"   >
-  <div id="map_canvas" style="heigth:50%; width:100%"></div>
+  <div id="map_canvas" style="heigth:50%; width:97%"></div>
 <input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
-<div id="historyDiv" class="historyDiv" style="width:100%;">
-<textarea rows="5"  id="post_code" style="width:100%;"  onchange=="resizeDiv('historyDiv')">
+<div id="historyDiv" class="historyDiv" style="width:100%">
+<textarea rows="5"  id="post_code" style="width:95%"  onchange=="resizeDiv('historyDiv')">
 </textarea>  
 </div>
 
-<div id="inputDiv" class="inputDiv" >
-<textarea rows="5"  id="pre_code" style="width:100%;"  onchange=="resizeDiv('inputDiv')">
+<div id="inputDiv" class="inputDiv"style="width:100%" >
+<textarea rows="5"  id="pre_code" style="width:95%"  onchange=="resizeDiv('inputDiv')">
 function exampleFunction(inputstring){
 alert(inputstring);}
 exampleFunction('w00t');
