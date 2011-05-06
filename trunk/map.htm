@@ -6,16 +6,16 @@
   html { height: 100% }
   body { height: 100%; margin: 0px; padding: 0px }
   #map_canvas { height: 400px; width: 800px; }
- 
+
 </style>
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
 </script>
 <script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="jquery.rotate.1-1.js"></script>
 <script type="text/javascript">
-  
+
 //$(document).ready(function() {
-//alert('ready');	
+//alert('ready');
 //});
 var map;
 var image;
@@ -30,14 +30,14 @@ function initialize() {
    	var myOptions = {
 		zoom: 16,
 		minZoom: 14,
-		maxZoom:18,      
+		maxZoom:18,
 		center: latlng,
 		mapTypeId: google.maps.MapTypeId.TERRAIN
 	};
     image = 'typhoon0.png';
     var map = new google.maps.Map(document.getElementById("map_canvas"),
         myOptions);
-    //mm = new GMarkerManager(map); 
+    //mm = new GMarkerManager(map);
     var myLatLng = map.getCenter();
     boatMarker = new google.maps.Marker({
         position: myLatLng,
@@ -45,12 +45,12 @@ function initialize() {
         icon: image
     });
 //  google.maps.event.addListener(map, 'click', function(event) {placeMarker(event.latLng);});
-	
+
 //  }
 /*
 function placeMarker(location) {
 var marker = new google.maps.Marker({
-      position: location, 
+      position: location,
       map: map
   });*/
   map.setCenter(location);
@@ -63,20 +63,26 @@ function runit()
 	var post_code=document.getElementById("post_code").value;
 	var pre_code=document.getElementById("pre_code").value;
 	document.getElementById("post_code").value=post_code+"\n/*Execution Time: "+ new Date()+ "*/\n"+pre_code;
-	
+
 	eval(pre_code);
 	$('#post_code').attr('scrollTop',$('#post_code').attr('scrollHeight'));
 }
 function rotBoat(){
 	if(BoatOrient==-1){BoatOrient=7}
-	if(BoatOrient==9){BoatOrient=1}	
+	if(BoatOrient==9){BoatOrient=1}
 	BoatOrient=BoatOrient%8;
 	var boatpath='typhoon'+BoatOrient.toString()+'.png';
 	$('.boat').attr('src',boatpath);
-        
+
 }
 /**/
-function handleKeyDown(keyCode){
+function keyEvent(theEvent)
+{
+	alert('hi');
+	alert(theEvent.keyCode);
+	handleKeyDown(theEvent.keyCode);
+}
+function keyDown(keyCode){
 	if(keyCode==65){
 		//rotate ccw
 		BoatOrient++;
@@ -88,22 +94,10 @@ function handleKeyDown(keyCode){
 		rotBoat();
 	}
 }
-/*
-function handleKeyUp(keyCode){
-	if(keyCode==65){
-		//rotate ccw
-		BoatOrient++;
-		rotBoat();
-	}
-	if(keyCode==68){
-		//rotate cw
-		BoatOrient--;
-		rotBoat();
-	}*/
-//}
+
 
 function toggleDiv(divId,toggleBtn){
-		
+
 	var btvalue= $('#'+toggleBtn).attr('value');
 	if(btvalue=="-"){
 		$('#'+divId).hide();
@@ -117,7 +111,7 @@ function toggleDiv(divId,toggleBtn){
 
 
 function toggleHistory(){
-		
+
 	var btvalue= $('#toggleHistoryButton').attr('value');
 	if(btvalue=="-"){
 		$('#historyDiv').hide();
@@ -128,14 +122,19 @@ function toggleHistory(){
 		$('#toggleHistoryButton').val("-");
 	}
 }
+
+function handleKeyDown() {
+	keyDown(event.keyCode);
+}
 </script>
 </head>
-<body onload="initialize()"   >
+<body onload="initialize()" onkeydown="handleKeyDown()" >
+<input type="button" id="togglemap" value="-" onclick="toggleDiv('map_canvas','togglemap')" >Map	<p>
   <div id="map_canvas" style="heigth:50%; width:97%"></div>
 <input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
 <div id="historyDiv" class="historyDiv" style="width:100%">
 <textarea rows="5"  id="post_code" style="width:95%"  onchange=="resizeDiv('historyDiv')">
-</textarea>  
+</textarea>
 </div>
 
 <div id="inputDiv" class="inputDiv"style="width:100%" >
@@ -147,7 +146,7 @@ exampleFunction('w00t');
    <input name="submit" type="submit" value="Run()" onclick="runit()" style="align:right;">
 </div>
 
-<div id="subDiv" class="subDiv" >
+<div id="subDiv" class="subDiv" onkeydown="return keyEvent(event)">
 <img src="typhoon0.png" class="boat" >
 </div>
 <input type="button" id="toggleSubButton" value="-" onclick="toggleDiv('subDiv','toggleSubButton')" >Sub	<p>
