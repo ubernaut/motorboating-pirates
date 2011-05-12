@@ -3,6 +3,25 @@
 <head>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <style type="text/css">
+      .completions {
+        position: absolute;
+        z-index: 10;
+        overflow: hidden;
+        -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+        -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+        box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+      }
+      .completions select {
+        background: #fafafa;
+        outline: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font-family: monospace;
+      }
+      .CodeMirror {
+        border: 1px solid #eee;
+      }
   html { height: 100% }
   body { height: 100%; margin: 0px; padding: 0px }
   #map_canvas { height: 400px; width: 800px; }
@@ -12,6 +31,11 @@
 </script>
 <script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="jquery.rotate.1-1.js"></script>
+    <link rel="stylesheet" href="lib/codemirror.css">
+    <script src="lib/codemirror.js"></script>
+    <link rel="stylesheet" href="mode/javascript/javascript.css">
+    <script src="mode/javascript/javascript.js"></script>
+    <link rel="stylesheet" href="css/docs.css">
 <script type="text/javascript">
 
 //$(document).ready(function() {
@@ -24,6 +48,8 @@ var BoatOrient;
 function initialize() {
 	//runit();
 	toggleHistory();
+
+	toggleDiv('map_canvas','togglemap');
 	toggleDiv('subDiv','toggleSubButton');
     	BoatOrient=0;
     	var latlng = new google.maps.LatLng(60.739444 ,-149.0933334);
@@ -61,7 +87,7 @@ var marker = new google.maps.Marker({
 function runit()
 {
 	var post_code=document.getElementById("post_code").value;
-	var pre_code=document.getElementById("pre_code").value;
+	var pre_code=document.getElementById("code").value;
 	document.getElementById("post_code").value=post_code+"\n/*Execution Time: "+ new Date()+ "*/\n"+pre_code;
 
 	eval(pre_code);
@@ -138,7 +164,7 @@ function handleKeyDown() {
 </div>
 
 <div id="inputDiv" class="inputDiv"style="width:100%" >
-<textarea rows="5"  id="pre_code" style="width:95%"  onchange=="resizeDiv('inputDiv')">
+<textarea rows="5"  id="code" style="width:95%"  onchange=="resizeDiv('inputDiv')">
 function exampleFunction(inputstring){
 alert(inputstring);}
 exampleFunction('w00t');
@@ -150,9 +176,6 @@ exampleFunction('w00t');
 <img src="typhoon0.png" class="boat" >
 </div>
 <input type="button" id="toggleSubButton" value="-" onclick="toggleDiv('subDiv','toggleSubButton')" >Sub	<p>
-<iframe
-  style="width: 75%; height: 300px"
-  src="http://jsfiddle.net/zalun/NmudS/embedded/">
-</iframe>
+<script src="complete.js"></script>
 </body>
 </html>
