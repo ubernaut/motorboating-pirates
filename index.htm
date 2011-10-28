@@ -53,7 +53,8 @@
 <script type="text/javascript">
 $(function(){
 	
-	
+	$('#toggleHistoryButton').trigger('click');
+	$('#togglecanvas').trigger('click');
 	(function () {
 		  // Minimal event-handling wrapper.
 		  function stopEvent() {
@@ -624,6 +625,8 @@ function handleKeyDown() {
 
 </head>
 <body onload="webGLStart();" >
+<a href="http://learningwebgl.com/blog/?p=370" target="blank">webgltutorials</a>
+<br/>
 <input type="button" id="toggleGLcanvas" value="-" onclick="toggleDiv('GLcanvas','toggleGLcanvas')" >GLcanvas	<p>
 <canvas id="GLcanvas" class="shadowbox" style="height:50%;width:100%"></canvas>
 
