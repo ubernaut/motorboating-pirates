@@ -1,2 +1,0 @@
-http://marcgrabanski.com/articles/jquery-google-maps-tutorial-basics
-
