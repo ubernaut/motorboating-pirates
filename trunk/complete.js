@@ -20,7 +20,7 @@
     for (var i = 0, e = arr.length; i < e; ++i) f(arr[i]);
   }
 
-  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+  editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     onKeyEvent: function(i, e) {
       // Hook into ctrl-space

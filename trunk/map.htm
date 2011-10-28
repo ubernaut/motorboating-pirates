@@ -31,96 +31,182 @@
 </script>
 <script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="jquery.rotate.1-1.js"></script>
-    <link rel="stylesheet" href="lib/codemirror.css">
-    <script src="lib/codemirror.js"></script>
-    <link rel="stylesheet" href="mode/javascript/javascript.css">
-    <script src="mode/javascript/javascript.js"></script>
-    <link rel="stylesheet" href="css/docs.css">
+<link rel="stylesheet" href="lib/codemirror.css">
+<script src="lib/codemirror.js"></script>
+<link rel="stylesheet" href="mode/javascript/javascript.css">
+<script src="mode/javascript/javascript.js"></script>
+<link rel="stylesheet" href="css/docs.css">
+<script src="complete.js"></script>
 <script type="text/javascript">
+$(function(){
+	(function () {
+		  // Minimal event-handling wrapper.
+		  function stopEvent() {
+		    if (this.preventDefault) {this.preventDefault(); this.stopPropagation();}
+		    else {this.returnValue = false; this.cancelBubble = true;}
+		  }
+		  function addStop(event) {
+		    if (!event.stop) event.stop = stopEvent;
+		    return event;
+		  }
+		  function connect(node, type, handler) {
+		    function wrapHandler(event) {handler(addStop(event || window.event));}
+		    if (typeof node.addEventListener == "function")
+		      node.addEventListener(type, wrapHandler, false);
+		    else
+		      node.attachEvent("on" + type, wrapHandler);
+		  }
 
-//$(document).ready(function() {
-//alert('ready');
-//});
-var map;
-var image;
-var boatMarker;
-var BoatOrient;
-function initialize() {
-	//runit();
-	toggleHistory();
+		  function forEach(arr, f) {
+		    for (var i = 0, e = arr.length; i < e; ++i) f(arr[i]);
+		  }
 
-	toggleDiv('map_canvas','togglemap');
-	toggleDiv('subDiv','toggleSubButton');
-    	BoatOrient=0;
-    	var latlng = new google.maps.LatLng(60.739444 ,-149.0933334);
-   	var myOptions = {
-		zoom: 16,
-		minZoom: 14,
-		maxZoom:18,
-		center: latlng,
-		mapTypeId: google.maps.MapTypeId.TERRAIN
-	};
-    image = 'typhoon0.png';
-    var map = new google.maps.Map(document.getElementById("map_canvas"),
-        myOptions);
-    //mm = new GMarkerManager(map);
-    var myLatLng = map.getCenter();
-    boatMarker = new google.maps.Marker({
-        position: myLatLng,
-        map: map,
-        icon: image
-    });
-//  google.maps.event.addListener(map, 'click', function(event) {placeMarker(event.latLng);});
+		  editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+		    lineNumbers: true,
+		    onKeyEvent: function(i, e) {
+		      // Hook into ctrl-space
+		      if (e.keyCode == 32 && (e.ctrlKey || e.metaKey) && !e.altKey) {
+		        e.stop();
+		        return startComplete();
+		      }
+		    }
+		  });
 
-//  }
-/*
-function placeMarker(location) {
-var marker = new google.maps.Marker({
-      position: location,
-      map: map
-  });*/
-  map.setCenter(location);
-	map.refresh();
+		  function startComplete() {
+		    // We want a single cursor position.
+		    if (editor.somethingSelected()) return;
+		    // Find the token at the cursor
+		    var cur = editor.getCursor(false), token = editor.getTokenAt(cur), tprop = token;
+		    // If it's not a 'word-style' token, ignore the token.
+		    if (!/^[\w$_]*$/.test(token.string)) {
+		      token = tprop = {start: cur.ch, end: cur.ch, string: "", state: token.state,
+		                       className: token.string == "." ? "js-property" : null};
+		    }
+		    // If it is a property, find out what it is a property of.
+		    while (tprop.className == "js-property") {
+		      tprop = editor.getTokenAt({line: cur.line, ch: tprop.start});
+		      if (tprop.string != ".") return;
+		      tprop = editor.getTokenAt({line: cur.line, ch: tprop.start});
+		      if (!context) var context = [];
+		      context.push(tprop);
+		    }
+		    var completions = getCompletions(token, context);
+		    if (!completions.length) return;
+		    function insert(str) {
+		      editor.replaceRange(str, {line: cur.line, ch: token.start}, {line: cur.line, ch: token.end});
+		    }
+		    // When there is only one completion, use it directly.
+		    if (completions.length == 1) {insert(completions[0]); return true;}
 
+		    // Build the select widget
+		    var complete = document.createElement("div");
+		    complete.className = "completions";
+		    var sel = complete.appendChild(document.createElement("select"));
+		    sel.multiple = true;
+		    for (var i = 0; i < completions.length; ++i) {
+		      var opt = sel.appendChild(document.createElement("option"));
+		      opt.appendChild(document.createTextNode(completions[i]));
+		    }
+		    sel.firstChild.selected = true;
+		    sel.size = Math.min(10, completions.length);
+		    var pos = editor.cursorCoords();
+		    complete.style.left = pos.x + "px";
+		    complete.style.top = pos.yBot + "px";
+		    document.body.appendChild(complete);
+		    // Hack to hide the scrollbar.
+		    if (completions.length <= 10)
+		      complete.style.width = (sel.clientWidth - 1) + "px";
+
+		    var done = false;
+		    function close() {
+		      if (done) return;
+		      done = true;
+		      complete.parentNode.removeChild(complete);
+		    }
+		    function pick() {
+		      insert(sel.options[sel.selectedIndex].value);
+		      close();
+		      setTimeout(function(){editor.focus();}, 50);
+		    }
+		    connect(sel, "blur", close);
+		    connect(sel, "keydown", function(event) {
+		      var code = event.keyCode;
+		      // Enter and space
+		      if (code == 13 || code == 32) {event.stop(); pick();}
+		      // Escape
+		      else if (code == 27) {event.stop(); close(); editor.focus();}
+		      else if (code != 38 && code != 40) {close(); editor.focus(); setTimeout(startComplete, 50);}
+		    });
+		    connect(sel, "dblclick", pick);
+
+		    sel.focus();
+		    // Opera sometimes ignores focusing a freshly created node
+		    if (window.opera) setTimeout(function(){if (!done) sel.focus();}, 100);
+		    return true;
+		  }
+
+		  var stringProps = ("charAt charCodeAt indexOf lastIndexOf substring substr slice trim trimLeft trimRight " +
+		                     "toUpperCase toLowerCase split concat match replace search").split(" ");
+		  var arrayProps = ("length concat join splice push pop shift unshift slice reverse sort indexOf " +
+		                    "lastIndexOf every some filter forEach map reduce reduceRight ").split(" ");
+		  var funcProps = "prototype apply call bind".split(" ");
+		  var keywords = ("break case catch continue debugger default delete do else false finally for function " +
+		                  "if in instanceof new null return switch throw true try typeof var void while with").split(" ");
+
+		  function getCompletions(token, context) {
+		    var found = [], start = token.string;
+		    function maybeAdd(str) {
+		      if (str.indexOf(start) == 0) found.push(str);
+		    }
+		    function gatherCompletions(obj) {
+		      if (typeof obj == "string") forEach(stringProps, maybeAdd);
+		      else if (obj instanceof Array) forEach(arrayProps, maybeAdd);
+		      else if (obj instanceof Function) forEach(funcProps, maybeAdd);
+		      for (var name in obj) maybeAdd(name);
+		    }
+
+		    if (context) {
+		      // If this is a property, see if it belongs to some object we can
+		      // find in the current environment.
+		      var obj = context.pop(), base;
+		      if (obj.className == "js-variable")
+		        base = window[obj.string];
+		      else if (obj.className == "js-string")
+		        base = "";
+		      else if (obj.className == "js-atom")
+		        base = 1;
+		      while (base != null && context.length)
+		        base = base[context.pop().string];
+		      if (base != null) gatherCompletions(base);
+		    }
+		    else {
+		      // If not, just look in the window object and any local scope
+		      // (reading into JS mode internals to get at the local variables)
+		      for (var v = token.state.localVars; v; v = v.next) maybeAdd(v.name);
+		      gatherCompletions(window);
+		      forEach(keywords, maybeAdd);
+		    }
+		    return found;
+		  }
+		})();
+	
+});
+
+
+function initialize() {	
+	//toggleDiv('canvas','togglecanvas');
+	toggleDiv('historyDiv','toggleHistoryButton');
 }
 
 function runit()
 {
 	var post_code=document.getElementById("post_code").value;
-	var pre_code=document.getElementById("code").value;
+	var pre_code=editor.getValue();//document.getElementById("code").value;
 	document.getElementById("post_code").value=post_code+"\n/*Execution Time: "+ new Date()+ "*/\n"+pre_code;
 
-	eval(pre_code);
+	eval(editor.getValue());
 	$('#post_code').attr('scrollTop',$('#post_code').attr('scrollHeight'));
 }
-function rotBoat(){
-	if(BoatOrient==-1){BoatOrient=7}
-	if(BoatOrient==9){BoatOrient=1}
-	BoatOrient=BoatOrient%8;
-	var boatpath='typhoon'+BoatOrient.toString()+'.png';
-	$('.boat').attr('src',boatpath);
-
-}
-/**/
-function keyEvent(theEvent)
-{
-	alert('hi');
-	alert(theEvent.keyCode);
-	handleKeyDown(theEvent.keyCode);
-}
-function keyDown(keyCode){
-	if(keyCode==65){
-		//rotate ccw
-		BoatOrient++;
-		rotBoat();
-	}
-	if(keyCode==68){
-		//rotate cw
-		BoatOrient--;
-		rotBoat();
-	}
-}
-
 
 function toggleDiv(divId,toggleBtn){
 
@@ -155,27 +241,25 @@ function handleKeyDown() {
 </script>
 </head>
 <body onload="initialize()" onkeydown="handleKeyDown()" >
-<input type="button" id="togglemap" value="-" onclick="toggleDiv('map_canvas','togglemap')" >Map	<p>
-  <div id="map_canvas" style="heigth:50%; width:97%"></div>
-<input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
-<div id="historyDiv" class="historyDiv" style="width:100%">
-<textarea rows="5"  id="post_code" style="width:95%"  onchange=="resizeDiv('historyDiv')">
-</textarea>
-</div>
+<input type="button" id="togglecanvas" value="-" onclick="toggleDiv('canvas','togglecanvas')" >canvas	<p>
+	<div id="canvas" style="heigth:50%; width:97%">
+	
+	</div>
+	<input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
+	<div id="historyDiv" class="historyDiv" style="width:100%">
+		<textarea rows="5"  id="post_code" style="width:95%"  onchange="resizeDiv('historyDiv')">
+		
+		</textarea>
+	</div>
 
-<div id="inputDiv" class="inputDiv"style="width:100%" >
-<textarea rows="5"  id="code" style="width:95%"  onchange=="resizeDiv('inputDiv')">
+	<div id="inputDiv" class="inputDiv" style="width:100%" >
+		<textarea rows="5"  id="code" style="width:95%"  onchange="resizeDiv('inputDiv')">
 function exampleFunction(inputstring){
-alert(inputstring);}
+	alert(inputstring);}
 exampleFunction('w00t');
-</textarea>
-   <input name="submit" type="submit" value="Run()" onclick="runit()" style="align:right;">
-</div>
+		</textarea>
+  		 <input name="submit" type="button" value="Run()" onclick="runit()" style="align:right;">
+	</div>
 
-<div id="subDiv" class="subDiv" onkeydown="return keyEvent(event)">
-<img src="typhoon0.png" class="boat" >
-</div>
-<input type="button" id="toggleSubButton" value="-" onclick="toggleDiv('subDiv','toggleSubButton')" >Sub	<p>
-<script src="complete.js"></script>
 </body>
 </html>
