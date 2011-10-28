@@ -39,6 +39,8 @@
 <script src="complete.js"></script>
 <script type="text/javascript">
 $(function(){
+	
+	
 	(function () {
 		  // Minimal event-handling wrapper.
 		  function stopEvent() {
@@ -195,11 +197,15 @@ $(function(){
 
 function initialize() {	
 	//toggleDiv('canvas','togglecanvas');
-	toggleDiv('historyDiv','toggleHistoryButton');
+	
 }
 
 function runit()
 {
+	if(document.getElementById('cbClearCanvas').checked==true){
+		var canvas = document.getElementById("canvas");
+		canvas.width = canvas.width;
+	}
 	var post_code=document.getElementById("post_code").value;
 	var pre_code=editor.getValue();//document.getElementById("code").value;
 	document.getElementById("post_code").value=post_code+"\n/*Execution Time: "+ new Date()+ "*/\n"+pre_code;
@@ -242,24 +248,41 @@ function handleKeyDown() {
 </head>
 <body onload="initialize()" onkeydown="handleKeyDown()" >
 <input type="button" id="togglecanvas" value="-" onclick="toggleDiv('canvas','togglecanvas')" >canvas	<p>
-	<div id="canvas" style="heigth:50%; width:97%">
+	<canvas id="canvas" height="200" width="800"></canvas>
 	
+	<br/>
+
+
+	<div id="inputDiv" class="inputDiv" style="width:100%" >
+		<textarea rows="5"  id="code" style="width:95%"  onchange="resizeDiv('inputDiv')">
+   function drawT(xpos, ypos, len) {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    
+      ctx.fillStyle = "rgba(200,200,200,0.3)";
+      ctx.beginPath();
+      ctx.moveTo(xpos, ypos);
+      ctx.lineTo(xpos-(len/2), ypos+((len)/2)*1.73);
+      ctx.lineTo(xpos+(len/2), ypos+((len)/2)*1.73);
+      ctx.closePath();
+      ctx.stroke();
+      if(len >1){
+    	  	drawT(xpos, ypos,len/2);
+     	 	drawT(xpos-(len/2), ypos+((len)/2)*1.73, len/2);
+     	 	drawT(xpos+(len/2), ypos+((len)/2)*1.73, len/2);
+     	 	}
+	}
+	drawT(200,0,100);
+		</textarea>
+  		 <input name="submit" type="button" value="Run()" onclick="runit()" style="align:right;">
+  		 <input type="checkbox" id="cbClearCanvas" checked><label for="cbClearCanvas">Clear Canvas</label>
 	</div>
-	<input type="button" id="toggleHistoryButton" value="+" onclick="toggleDiv('historyDiv','toggleHistoryButton')" >History	<p>
+<br/>
+	<input type="button" id="toggleHistoryButton" value="-" onclick="toggleDiv('historyDiv','toggleHistoryButton');" >History	<p>
 	<div id="historyDiv" class="historyDiv" style="width:100%">
 		<textarea rows="5"  id="post_code" style="width:95%"  onchange="resizeDiv('historyDiv')">
 		
 		</textarea>
 	</div>
-
-	<div id="inputDiv" class="inputDiv" style="width:100%" >
-		<textarea rows="5"  id="code" style="width:95%"  onchange="resizeDiv('inputDiv')">
-function exampleFunction(inputstring){
-	alert(inputstring);}
-exampleFunction('w00t');
-		</textarea>
-  		 <input name="submit" type="button" value="Run()" onclick="runit()" style="align:right;">
-	</div>
-
 </body>
 </html>
