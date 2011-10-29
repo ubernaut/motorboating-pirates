@@ -634,13 +634,13 @@ function handleKeyDown() {
 
 
 <input type="button" id="togglecanvas" value="-" onclick="toggleDiv('canvas','togglecanvas')" >canvas	<p>
-	<canvas id="canvas" class="shadowbox 2dcanvas" style="height:50%;width:100%"></canvas>
+	<canvas id="canvas" class="shadowbox 2dcanvas" height="400px" width="800px"></canvas>
 	
 	<br/>
 
 
-	<div id="inputDiv" class="inputDiv shadowbox" style="width:100%" >
-		<textarea rows="5"  id="code" style="width:95%"  onchange="resizeDiv('inputDiv')">
+	<div id="inputDiv" class="inputDiv shadowbox" style="width:800px;" >
+		<textarea rows="5"  id="code" style="width:800px;"  onchange="resizeDiv('inputDiv')">
    function drawT(xpos, ypos, len) {
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
@@ -665,8 +665,8 @@ function handleKeyDown() {
 	</div>
 <br/>
 	<input type="button" id="toggleHistoryButton" value="-" onclick="toggleDiv('historyDiv','toggleHistoryButton');" >History	<p>
-	<div id="historyDiv" class="historyDiv shadowbox" style="width:100%">
-		<textarea rows="5"  id="post_code" style="width:95%"  onchange="resizeDiv('historyDiv')">
+	<div id="historyDiv" class="historyDiv shadowbox" style="width:800px;">
+		<textarea rows="5"  id="post_code" style="width:800px;"  onchange="resizeDiv('historyDiv')">
 		
 		</textarea>
 	</div>
