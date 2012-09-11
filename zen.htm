@@ -1,0 +1,113 @@
+<html>
+<head>
+
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	
+	addToHtml($("#dvWTF"),buildInfoTable($("#dvMainContentWrapper"),"dvMainContentWrapper","$(\'#dvMainContentWrapper\')"));
+});
+function addToHtml(dest, content){
+    dest.html(dest.html()+content);    
+}
+//buildInfoTable($('#dvMainContentWrapper')[context],context,1,'$('#dvMainContentWrapper')[context]')
+
+
+//buildInfoTable($('#dvMainContentWrapper')[context],context,1,'$('#dvMainContentWrapper')[context]')
+//buildInfoTable($('#dvMainContentWrapper')[context],'context',1,'$('#dvMainContentWrapper')[context]')
+//buildInfoTable( $('#dvMainContentWrapper').context , 'context', 1 , '$(\'#dvMainContentWrapper\').context' )
+//buildInfoTable($('#dvMainContentWrapper').context,'context',1,'$('#dvMainContentWrapper').context')
+//buildInfoTable($('#dvMainContentWrapper').context,		'context',1,'$('#dvMainContentWrapper').context')"	title="$('#dvMainContentWrapper').context"
+//buildInfoTable($('#dvMainContentWrapper').context,'context',1,'$(\'#dvMainContentWrapper').context')
+
+//addToHtml('$('#tddvMainContentWrapper)buildInfoTable($('#dvMainContentWrapper').context,'context',1,'$(\'#dvMainContentWrapper\').context'))
+
+
+//addToHtml('$('#tddvMainContentWrapper)buildInfoTable($('#dvMainContentWrapper').context,'context',1,'$(\'#dvMainContentWrapper\').context'))
+
+
+//addToHtml('$('#tddvMainContentWrapper)buildInfoTable($('#dvMainContentWrapper').context,'context',1,'$(\'#dvMainContentWrapper\').context'))"
+
+
+
+function buildInfoTable(targetObject, name,  path){    
+    var tableString = '<div id="dv'+name+'" class="shadowbox" style="display:inline-block;">' 
+        +'<table id="tb'+name+'" style="border:1px solid black;">'
+        +'<tr><th id="thTitle'+name+'" colpan="4">'+name+'</th></tr>'
+        +'<tr><th>Name</th><th>Type</th><th>Value</th><th>+/-</th></tr>';
+    for(obj in targetObject){        
+        objType = typeof targetObject[obj];        
+        tableString+='<tr><td>'+obj+'</td><td>'+objType+'</td><td id="td'+obj+'">';        
+        if(objType=='function'){            
+        }
+        else if(objType=='object'){
+           tableString+= targetObject[obj];
+           tableString+='<input type="button" value="+" onclick="addToHtml($(\'#td'+obj+'\')\,';
+           buildString ='buildInfoTable('+path+'.'+obj+','
+           	+'\''+obj+'\','
+               +'\''+path.replace(/'/g,"\\'")+'.'+obj+'\'))';
+           tableString +=buildString+'" title="'+path+'.'+obj+'">';            
+        }
+        else{            
+            tableString+=targetObject[obj];
+        }
+        tableString+='</td><td>-</td></tr>';
+    }
+    tableString+="</table></div>";        
+    return tableString;
+}
+
+</script>
+
+<style type="text/css">
+
+.shadowbox{
+    background:white;
+    border-radius: 10px;
+    border: outset 5px;
+    box-shadow: 18px 18px 18px black;
+    
+    
+}
+td {
+border:1px solid black;
+padding:0px;
+margin:0px
+}
+th {
+border:1px solid black;
+padding:0px;
+margin:0px
+}
+
+tr {
+border:1px solid black;
+padding:0px;
+margin:0px;
+
+}    
+body{
+    background:lightblue;
+    }​
+</style>
+
+
+</head>
+
+
+
+
+<body>
+<div id="dvMainContentWrapper" style="border: 1px solid black; display:inline-block;"> 
+	<div>
+		<input type="button" value="foo">
+		<p>
+		<input type="button" value="bar">
+	</div>
+</div>
+
+<div id="dvWTF"></div>
+
+</body>
+</html>
